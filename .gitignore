@@ -1,0 +1,10 @@
+node_modules/
+*.log
+.DS_Store
+
+# Generated outputs (keep templates and sample inputs)
+output.svg
+output.png
+sample-*
+
+

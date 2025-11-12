@@ -1,0 +1,28 @@
+{
+  "name": "svg-editor",
+  "version": "1.0.0",
+  "description": "CLI tool to edit SVG text headers with automatic font size adjustment",
+  "main": "svg-editor.js",
+  "bin": {
+    "svg-editor": "./cli.js"
+  },
+  "scripts": {
+    "image": "node cli.js"
+  },
+  "keywords": [
+    "svg",
+    "editor",
+    "text",
+    "cli",
+    "header"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@resvg/resvg-js": "^2.6.2",
+    "@svgdotjs/svg.js": "^3.2.5",
+    "commander": "^14.0.2",
+    "sharp": "^0.34.5",
+    "svgdom": "^0.1.22"
+  }
+}
