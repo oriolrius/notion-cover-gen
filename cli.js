@@ -19,6 +19,8 @@ program
   .option('-t, --template <file>', 'Template SVG file', '../notion.svg')
   .option('-s, --size <number>', 'Fixed font size (auto-calculated if not provided)')
   .option('-b, --background <file>', 'Background image (PNG/JPG) to embed in SVG')
+  .option('--crop', 'Crop background image to 5:2 aspect ratio')
+  .option('--blur <number>', 'Apply Gaussian blur with sigma value (e.g., 5 for light, 15 for heavy)')
   .option('--no-png', 'Skip PNG generation (SVG only)')
   .option('--png-scale <number>', 'PNG scale factor for higher resolution', '1')
   .option('--no-auto-color', 'Disable automatic text color detection from background')
@@ -31,6 +33,8 @@ program
       const generatePNG = options.png !== false;
       const pngScale = parseFloat(options.pngScale);
       const autoColor = options.autoColor !== false;
+      const cropTo5x2 = options.crop === true;
+      const gaussianBlur = options.blur ? parseFloat(options.blur) : null;
 
       console.log('🎨 SVG Text Editor\n');
 
@@ -41,6 +45,8 @@ program
         generatePNG,
         pngScale,
         autoColor,
+        cropTo5x2,
+        gaussianBlur,
       });
 
       console.log('\n✨ Generation complete!');
@@ -153,11 +159,15 @@ program
   .argument('<template>', 'SVG template file')
   .argument('<image>', 'Background image file (PNG/JPG)')
   .option('-o, --output <file>', 'Output file (default: overwrites template)')
-  .action((template, image, options) => {
+  .option('--crop', 'Crop background image to 5:2 aspect ratio')
+  .option('--blur <number>', 'Apply Gaussian blur with sigma value (e.g., 5 for light, 15 for heavy)')
+  .action(async (template, image, options) => {
     try {
       const templatePath = path.resolve(template);
       const imagePath = path.resolve(image);
       const outputPath = options.output ? path.resolve(options.output) : templatePath;
+      const cropTo5x2 = options.crop === true;
+      const gaussianBlur = options.blur ? parseFloat(options.blur) : null;
 
       console.log('🎨 SVG Background Replacer\n');
       console.log(`📂 Template: ${templatePath}`);
@@ -165,7 +175,7 @@ program
       console.log(`📂 Output: ${outputPath}\n`);
 
       const editor = new SVGTextEditor(templatePath);
-      const updatedSvg = editor.replaceBackgroundImage(imagePath);
+      const updatedSvg = await editor.replaceBackgroundImage(imagePath, cropTo5x2, gaussianBlur);
 
       editor.saveFile(updatedSvg, outputPath);
 

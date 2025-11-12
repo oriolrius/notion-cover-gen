@@ -38,37 +38,47 @@ class SVGTextEditor {
   }
 
   /**
-   * Convert image file to base64 data URL
+   * Convert image file or buffer to base64 data URL
    *
-   * @param {string} imagePath - Path to image file
+   * @param {string|Buffer} imagePathOrBuffer - Path to image file or image buffer
+   * @param {string} mimeTypeOverride - Optional MIME type override (required when passing buffer)
    * @returns {string} - Base64 data URL
    */
-  imageToBase64(imagePath) {
-    if (!fs.existsSync(imagePath)) {
-      throw new Error(`Image file not found: ${imagePath}`);
+  imageToBase64(imagePathOrBuffer, mimeTypeOverride = null) {
+    let imageBuffer;
+    let mimeType;
+
+    if (Buffer.isBuffer(imagePathOrBuffer)) {
+      // Input is a buffer
+      imageBuffer = imagePathOrBuffer;
+      mimeType = mimeTypeOverride || 'image/png';
+    } else {
+      // Input is a file path
+      if (!fs.existsSync(imagePathOrBuffer)) {
+        throw new Error(`Image file not found: ${imagePathOrBuffer}`);
+      }
+      imageBuffer = fs.readFileSync(imagePathOrBuffer);
+      mimeType = this.getImageMimeType(imagePathOrBuffer);
     }
 
-    const imageBuffer = fs.readFileSync(imagePath);
     const base64 = imageBuffer.toString('base64');
-    const mimeType = this.getImageMimeType(imagePath);
-
     return `data:${mimeType};base64,${base64}`;
   }
 
   /**
    * Analyze image brightness and determine optimal text color
    *
-   * @param {string} imagePath - Path to image file
+   * @param {string|Buffer} imagePathOrBuffer - Path to image file or image buffer
    * @returns {Promise<string>} - Hex color code for text (#ffffff or #000000)
    */
-  async analyzeImageForTextColor(imagePath) {
-    if (!fs.existsSync(imagePath)) {
-      throw new Error(`Image file not found: ${imagePath}`);
+  async analyzeImageForTextColor(imagePathOrBuffer) {
+    if (typeof imagePathOrBuffer === 'string' && !fs.existsSync(imagePathOrBuffer)) {
+      throw new Error(`Image file not found: ${imagePathOrBuffer}`);
     }
 
     try {
       // Get image statistics
-      const stats = await sharp(imagePath).stats();
+      const stats = await sharp(imagePathOrBuffer).stats();
 
       // Calculate average brightness across all channels
       // Using luminance formula: 0.299*R + 0.587*G + 0.114*B
@@ -106,13 +116,104 @@ class SVGTextEditor {
   }
 
   /**
+   * Crop image to 5:2 aspect ratio (width:height = 5:2)
+   * Crops from the center to maintain focal point
+   *
+   * @param {string} imagePath - Path to image file
+   * @returns {Promise<Buffer>} - Cropped image buffer
+   */
+  async cropImageTo5x2(imagePath) {
+    if (!fs.existsSync(imagePath)) {
+      throw new Error(`Image file not found: ${imagePath}`);
+    }
+
+    try {
+      const image = sharp(imagePath);
+      const metadata = await image.metadata();
+      const { width, height } = metadata;
+
+      // Target aspect ratio 5:2 (width:height = 5:2)
+      const targetRatio = 5 / 2; // 2.5
+      const currentRatio = width / height;
+
+      let cropWidth, cropHeight, left, top;
+
+      if (currentRatio > targetRatio) {
+        // Image is wider than 5:2, crop width
+        cropHeight = height;
+        cropWidth = Math.round(height * targetRatio);
+        left = Math.round((width - cropWidth) / 2);
+        top = 0;
+      } else {
+        // Image is taller than 5:2, crop height
+        cropWidth = width;
+        cropHeight = Math.round(width / targetRatio);
+        left = 0;
+        top = Math.round((height - cropHeight) / 2);
+      }
+
+      console.log(`✂️  Cropping image to 5:2 ratio:`);
+      console.log(`   Original: ${width}x${height} (${currentRatio.toFixed(2)}:1)`);
+      console.log(`   Cropped: ${cropWidth}x${cropHeight} (2.50:1)`);
+
+      const croppedBuffer = await image
+        .extract({ left, top, width: cropWidth, height: cropHeight })
+        .toBuffer();
+
+      return croppedBuffer;
+    } catch (error) {
+      throw new Error(`Image cropping failed: ${error.message}`);
+    }
+  }
+
+  /**
+   * Apply Gaussian blur to image
+   *
+   * @param {Buffer} imageBuffer - Image buffer
+   * @param {number} sigma - Blur amount (sigma value for Gaussian blur, typically 0.3-100)
+   * @returns {Promise<Buffer>} - Blurred image buffer
+   */
+  async applyGaussianBlur(imageBuffer, sigma) {
+    try {
+      console.log(`🌫️  Applying Gaussian blur with sigma: ${sigma}`);
+
+      const blurredBuffer = await sharp(imageBuffer)
+        .blur(sigma)
+        .toBuffer();
+
+      return blurredBuffer;
+    } catch (error) {
+      throw new Error(`Gaussian blur failed: ${error.message}`);
+    }
+  }
+
+  /**
    * Replace background image in SVG
    *
    * @param {string} imagePath - Path to new background image
-   * @returns {string} - Updated SVG content
+   * @param {boolean} cropTo5x2 - Whether to crop image to 5:2 ratio
+   * @param {number|null} gaussianBlur - Gaussian blur sigma (null to skip blur)
+   * @returns {Promise<string>} - Updated SVG content
    */
-  replaceBackgroundImage(imagePath) {
-    const base64Data = this.imageToBase64(imagePath);
+  async replaceBackgroundImage(imagePath, cropTo5x2 = false, gaussianBlur = null) {
+    let imageBuffer = null;
+    let base64Data;
+    const mimeType = this.getImageMimeType(imagePath);
+
+    // Step 1: Load or crop image
+    if (cropTo5x2) {
+      imageBuffer = await this.cropImageTo5x2(imagePath);
+    } else {
+      imageBuffer = fs.readFileSync(imagePath);
+    }
+
+    // Step 2: Apply Gaussian blur if specified
+    if (gaussianBlur !== null && gaussianBlur > 0) {
+      imageBuffer = await this.applyGaussianBlur(imageBuffer, gaussianBlur);
+    }
+
+    // Step 3: Convert to base64
+    base64Data = this.imageToBase64(imageBuffer, mimeType);
 
     // Replace the xlink:href data URL in the image element
     this.svgContent = this.svgContent.replace(
@@ -311,6 +412,8 @@ class SVGTextEditor {
    * @param {number} options.pngScale - PNG scale factor
    * @param {string|null} options.backgroundImage - Path to background image
    * @param {boolean} options.autoColor - Auto-detect text color from background
+   * @param {boolean} options.cropTo5x2 - Crop background image to 5:2 aspect ratio
+   * @param {number|null} options.gaussianBlur - Gaussian blur sigma value
    * @returns {Promise<Object>} - Generation result with file paths
    */
   async generate(text, outputPath, options = {}) {
@@ -320,17 +423,41 @@ class SVGTextEditor {
       pngScale = 1,
       backgroundImage = null,
       autoColor = true,
+      cropTo5x2 = false,
+      gaussianBlur = null,
     } = options;
 
     let textColor = null;
 
     // Replace background image if provided
     if (backgroundImage) {
-      this.replaceBackgroundImage(backgroundImage);
+      // Process image: crop and/or blur for color analysis
+      let imageForColorAnalysis = backgroundImage;
+      let processedBuffer = null;
+
+      // Step 1: Crop if needed
+      if (cropTo5x2) {
+        processedBuffer = await this.cropImageTo5x2(backgroundImage);
+      } else {
+        processedBuffer = fs.readFileSync(backgroundImage);
+      }
+
+      // Step 2: Apply blur if needed
+      if (gaussianBlur !== null && gaussianBlur > 0) {
+        processedBuffer = await this.applyGaussianBlur(processedBuffer, gaussianBlur);
+      }
+
+      // Use processed buffer for color analysis
+      if (cropTo5x2 || gaussianBlur) {
+        imageForColorAnalysis = processedBuffer;
+      }
+
+      // Replace background (will apply crop and blur)
+      await this.replaceBackgroundImage(backgroundImage, cropTo5x2, gaussianBlur);
 
       // Auto-detect text color from background if enabled
       if (autoColor) {
-        textColor = await this.analyzeImageForTextColor(backgroundImage);
+        textColor = await this.analyzeImageForTextColor(imageForColorAnalysis);
       }
     }
 
