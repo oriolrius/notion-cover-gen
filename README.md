@@ -25,6 +25,8 @@ Output:
 - 🖼️ **High-quality PNG conversion** - Uses resvg-js for professional-grade rendering
 - 🎭 **Background image replacement** - Embed custom PNG/JPG backgrounds with base64 encoding
 - 🌈 **Smart text color detection** - Automatically selects optimal text color based on background brightness
+- ✂️ **5:2 aspect ratio cropping** - Center-focused cropping for optimal header composition
+- 🌫️ **Gaussian blur effect** - Configurable blur to soften backgrounds and improve text readability
 - 🚀 **CLI interface** - Easy-to-use command-line tool with multiple commands
 - 📦 **Batch generation** - Create multiple headers at once
 - ⚡ **Flexible options** - Control font size, output format, and PNG scale
@@ -150,6 +152,66 @@ svg-editor generate -t templates/base.svg -b dark-photo.jpg 'Sample Text'
 svg-editor generate -t templates/base.svg -b samples/collage.jpg 'My Text' --no-auto-color
 ```
 
+### 9. Crop Background to 5:2 Aspect Ratio
+
+Automatically crop background images to a perfect 5:2 (width:height) aspect ratio, ideal for header banners:
+
+```bash
+# Crop image to 5:2 ratio (center-focused)
+svg-editor generate -t templates/base.svg -b wide-image.jpg 'My Header' --crop
+```
+
+**How it works:**
+- Analyzes image dimensions and aspect ratio
+- Calculates optimal crop to achieve 5:2 ratio (2.5:1)
+- Crops from center to maintain focal point
+- Displays original and cropped dimensions
+
+**Example output:**
+```
+✂️  Cropping image to 5:2 ratio:
+   Original: 1920x1280 (1.50:1)
+   Cropped: 1920x768 (2.50:1)
+```
+
+**Use cases:**
+- Wide landscape photos that are too tall
+- Portrait images that need to be converted to banner format
+- Ensuring consistent dimensions across multiple headers
+
+### 10. Apply Gaussian Blur
+
+Add a soft blur effect to background images to improve text readability and create a professional look:
+
+```bash
+# Light blur for subtle effect
+svg-editor generate -t templates/base.svg -b photo.jpg 'My Title' --blur 5
+
+# Medium blur for busy backgrounds
+svg-editor generate -t templates/base.svg -b busy-image.jpg 'Header' --blur 12
+
+# Heavy blur for dramatic effect
+svg-editor generate -t templates/base.svg -b background.png 'Title' --blur 20
+```
+
+**Blur Guidelines:**
+- **Light (3-7)**: Subtle softening, preserves image details
+- **Medium (8-15)**: Noticeable blur, good for text backgrounds
+- **Heavy (16-30)**: Strong blur effect for very busy images
+- **Extreme (30+)**: Maximum blur, almost abstract
+
+**Combine with cropping:**
+```bash
+# Crop to 5:2 ratio and apply medium blur
+svg-editor generate -t templates/base.svg -b photo.jpg 'Welcome' --crop --blur 10
+```
+
+**Processing order:**
+1. Crop image (if `--crop` is specified)
+2. Apply Gaussian blur (if `--blur` is specified)
+3. Analyze for optimal text color
+4. Embed in SVG
+
 ## Command Reference
 
 ### `generate` - Generate SVG and PNG
@@ -163,6 +225,8 @@ svg-editor generate <text> [options]
 - `-b, --background <file>` - Background image (PNG/JPG) to embed in SVG
 - `-o, --output <file>` - Output file path without extension (default: "output")
 - `-s, --size <number>` - Fixed font size (auto-calculated if not provided)
+- `--crop` - Crop background image to 5:2 aspect ratio
+- `--blur <number>` - Apply Gaussian blur with sigma value (e.g., 5 for light, 15 for heavy)
 - `--no-png` - Skip PNG generation (SVG only)
 - `--png-scale <number>` - PNG scale factor for higher resolution (default: 1)
 - `--no-auto-color` - Disable automatic text color detection from background
@@ -180,6 +244,15 @@ svg-editor generate -t templates/base.svg -b samples/collage.jpg --png-scale 2 '
 
 # SVG only (no PNG)
 svg-editor generate -t templates/base.svg -o samples/header --no-png 'Title'
+
+# Crop background to 5:2 ratio
+svg-editor generate -t templates/base.svg -b wide-photo.jpg --crop 'Header'
+
+# Apply blur effect
+svg-editor generate -t templates/base.svg -b busy-image.jpg --blur 10 'Title'
+
+# Combine crop and blur
+svg-editor generate -t templates/base.svg -b photo.jpg --crop --blur 8 'Welcome'
 
 # Using original notion.svg template
 svg-editor generate "Computer Science" -o output
@@ -230,6 +303,35 @@ svg-editor convert samples/output.svg -o samples/output-hires.png -s 2
 
 # 3x scale for ultra-high resolution
 svg-editor convert samples/output.svg -s 3
+```
+
+### `replace-background` - Replace Background in Template
+
+```bash
+svg-editor replace-background <template> <image> [options]
+```
+
+**Options:**
+- `-o, --output <file>` - Output file (default: overwrites template)
+- `--crop` - Crop background image to 5:2 aspect ratio
+- `--blur <number>` - Apply Gaussian blur with sigma value (e.g., 5 for light, 15 for heavy)
+
+**Examples:**
+```bash
+# Replace background in existing template
+svg-editor replace-background templates/base.svg new-photo.jpg -o output.svg
+
+# Replace with cropping
+svg-editor replace-background templates/base.svg wide-image.jpg --crop -o result.svg
+
+# Replace with blur effect
+svg-editor replace-background templates/base.svg busy-photo.jpg --blur 12 -o result.svg
+
+# Replace with both crop and blur
+svg-editor replace-background templates/base.svg photo.jpg --crop --blur 8 -o result.svg
+
+# Overwrite original template
+svg-editor replace-background templates/base.svg new-background.jpg
 ```
 
 ## Template System
@@ -353,6 +455,13 @@ await editor.generate('My Text', 'output', {
   autoColor: false,      // Keep original text color
 });
 
+// Generate with 5:2 crop and blur
+await editor.generate('My Text', 'output', {
+  backgroundImage: './my-background.jpg',
+  cropTo5x2: true,       // Crop to 5:2 aspect ratio
+  gaussianBlur: 10,      // Apply blur with sigma 10
+});
+
 // Generate SVG only
 await editor.generate('My Text', 'output', {
   generatePNG: false,
@@ -362,6 +471,10 @@ await editor.generate('My Text', 'output', {
 await editor.generate('My Text', 'output', {
   pngScale: 2,
 });
+
+// Replace background with processing
+await editor.replaceBackgroundImage('./photo.jpg', true, 8);
+// Parameters: imagePath, cropTo5x2, gaussianBlur
 
 // Just get SVG content
 const svgContent = editor.updateText('My Text', 180);
