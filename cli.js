@@ -7,8 +7,8 @@ const SVGTextEditor = require('./svg-editor');
 const program = new Command();
 
 program
-  .name('svg-editor')
-  .description('CLI tool to edit SVG text and convert to multiple formats')
+  .name('notion-cover-gen')
+  .description('Generate beautiful Notion blog covers with AI-powered image search and smart text styling')
   .version('1.0.0');
 
 program
@@ -40,7 +40,7 @@ program
       const cropTo5x2 = options.crop === true;
       const gaussianBlur = options.blur ? parseFloat(options.blur) : null;
 
-      console.log('🎨 SVG Text Editor\n');
+      console.log('🎨 Notion Cover Gen\n');
 
       const editor = new SVGTextEditor(templatePath);
       await editor.generate(text, outputPath, {
@@ -78,7 +78,7 @@ program
       const generatePNG = options.png !== false;
       const pngScale = parseFloat(options.pngScale);
 
-      console.log('🎨 SVG Text Editor - Batch Mode\n');
+      console.log('🎨 Notion Cover Gen - Batch Mode\n');
       console.log(`📦 Processing ${texts.length} items...\n`);
 
       const editor = new SVGTextEditor(templatePath);
@@ -136,7 +136,7 @@ program
         : inputPath.replace(/\.svg$/, '.png');
       const scale = parseFloat(options.scale);
 
-      console.log('🎨 SVG to PNG Converter\n');
+      console.log('🎨 Notion Cover Gen - Converter\n');
       console.log(`📂 Input: ${inputPath}`);
       console.log(`📂 Output: ${outputPath}`);
       console.log(`🔍 Scale: ${scale}x\n`);
@@ -175,7 +175,7 @@ program
       const cropTo5x2 = options.crop === true;
       const gaussianBlur = options.blur ? parseFloat(options.blur) : null;
 
-      console.log('🎨 SVG Background Replacer\n');
+      console.log('🎨 Notion Cover Gen - Background Replace\n');
       console.log(`📂 Template: ${templatePath}`);
       console.log(`🖼️  Image: ${imagePath}`);
       console.log(`📂 Output: ${outputPath}\n`);

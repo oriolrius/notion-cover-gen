@@ -1,41 +1,46 @@
 {
-  "name": "@oriolrius/svg-editor",
-  "version": "1.1.0",
-  "description": "CLI tool to edit SVG text headers with automatic font size adjustment, background image processing, and Freepik API integration",
+  "name": "@oriolrius/notion-cover-gen",
+  "version": "1.0.0",
+  "description": "AI-powered CLI for generating beautiful Notion blog covers with smart text placement, automatic color selection, and Freepik API integration",
   "main": "svg-editor.js",
   "bin": {
-    "svg-editor": "./cli.js"
+    "notion-cover-gen": "./cli.js"
   },
   "scripts": {
     "image": "node cli.js",
     "test": "echo \"No tests specified\" && exit 0"
   },
   "keywords": [
-    "svg",
-    "editor",
-    "text",
-    "cli",
+    "notion",
+    "cover",
     "header",
+    "blog",
+    "generator",
+    "cli",
+    "freepik",
+    "ai",
+    "auto-color",
+    "text-sizing",
+    "svg",
+    "png",
     "banner",
     "image",
     "crop",
     "blur",
-    "freepik",
-    "background",
-    "png",
-    "resvg",
-    "sharp"
+    "content-creation",
+    "blog-post",
+    "cover-image"
   ],
   "author": "",
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/oriolrius/svg-text-editor.git"
+    "url": "git+https://github.com/oriolrius/notion-cover-gen.git"
   },
   "bugs": {
-    "url": "https://github.com/oriolrius/svg-text-editor/issues"
+    "url": "https://github.com/oriolrius/notion-cover-gen/issues"
   },
-  "homepage": "https://github.com/oriolrius/svg-text-editor#readme",
+  "homepage": "https://github.com/oriolrius/notion-cover-gen#readme",
   "engines": {
     "node": ">=18.0.0"
   },
