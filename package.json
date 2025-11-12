@@ -1,23 +1,52 @@
 {
   "name": "svg-editor",
   "version": "1.1.0",
-  "description": "CLI tool to edit SVG text headers with automatic font size adjustment",
+  "description": "CLI tool to edit SVG text headers with automatic font size adjustment, background image processing, and Freepik API integration",
   "main": "svg-editor.js",
   "bin": {
     "svg-editor": "./cli.js"
   },
   "scripts": {
-    "image": "node cli.js"
+    "image": "node cli.js",
+    "test": "echo \"No tests specified\" && exit 0"
   },
   "keywords": [
     "svg",
     "editor",
     "text",
     "cli",
-    "header"
+    "header",
+    "banner",
+    "image",
+    "crop",
+    "blur",
+    "freepik",
+    "background",
+    "png",
+    "resvg",
+    "sharp"
   ],
   "author": "",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oriolrius/svg-text-editor.git"
+  },
+  "bugs": {
+    "url": "https://github.com/oriolrius/svg-text-editor/issues"
+  },
+  "homepage": "https://github.com/oriolrius/svg-text-editor#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "cli.js",
+    "svg-editor.js",
+    "templates/",
+    "README.md",
+    "LICENSE",
+    ".env.example"
+  ],
   "dependencies": {
     "@resvg/resvg-js": "^2.6.2",
     "@svgdotjs/svg.js": "^3.2.5",
