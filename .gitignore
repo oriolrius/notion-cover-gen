@@ -1,6 +1,8 @@
 node_modules/
 *.log
 .DS_Store
+.env
+temp/
 
 # Generated outputs (keep templates and sample inputs)
 output.svg

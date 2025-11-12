@@ -2,6 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const { Resvg } = require('@resvg/resvg-js');
 const sharp = require('sharp');
+const https = require('https');
+require('dotenv').config();
 
 /**
  * SVG Text Editor
@@ -15,6 +17,125 @@ class SVGTextEditor {
 
     this.templatePath = templatePath;
     this.svgContent = fs.readFileSync(templatePath, 'utf-8');
+  }
+
+  /**
+   * Download image from URL to temporary file
+   *
+   * @param {string} url - Image URL to download
+   * @param {string} outputPath - Path to save the downloaded image
+   * @returns {Promise<string>} - Path to downloaded file
+   */
+  async downloadImage(url, outputPath) {
+    return new Promise((resolve, reject) => {
+      const file = fs.createWriteStream(outputPath);
+
+      https.get(url, (response) => {
+        if (response.statusCode !== 200) {
+          reject(new Error(`Failed to download image: ${response.statusCode}`));
+          return;
+        }
+
+        response.pipe(file);
+
+        file.on('finish', () => {
+          file.close();
+          console.log(`✅ Image downloaded: ${path.basename(outputPath)}`);
+          resolve(outputPath);
+        });
+      }).on('error', (err) => {
+        fs.unlink(outputPath, () => {}); // Delete incomplete file
+        reject(new Error(`Download failed: ${err.message}`));
+      });
+    });
+  }
+
+  /**
+   * Search for images using Freepik API
+   *
+   * @param {string} query - Search query/caption
+   * @param {number} limit - Number of results to return (default: 5)
+   * @returns {Promise<Array>} - Array of image results
+   */
+  async searchFreepikImages(query, limit = 5) {
+    const apiKey = process.env.FREEPIK_API_KEY;
+
+    if (!apiKey) {
+      throw new Error('FREEPIK_API_KEY not found in environment variables');
+    }
+
+    console.log(`🔍 Searching Freepik for: "${query}"`);
+
+    try {
+      const url = `https://api.freepik.com/v1/resources?locale=en-US&term=${encodeURIComponent(query)}&limit=${limit}`;
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'x-freepik-api-key': apiKey,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Freepik API error: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      if (!data.data || data.data.length === 0) {
+        throw new Error('No images found for the given search query');
+      }
+
+      console.log(`✅ Found ${data.data.length} images`);
+      return data.data;
+    } catch (error) {
+      throw new Error(`Freepik search failed: ${error.message}`);
+    }
+  }
+
+  /**
+   * Get background image from Freepik based on search caption
+   *
+   * @param {string} caption - Search caption for image
+   * @param {number} index - Index of result to use (default: 0 for first result)
+   * @returns {Promise<string>} - Path to downloaded image
+   */
+  async getFreepikBackgroundImage(caption, index = 0) {
+    // Request enough results to get the requested index (+ some buffer)
+    const limit = Math.min(index + 5, 20); // Max 20 results from API
+    const results = await this.searchFreepikImages(caption, limit);
+
+    if (results.length <= index) {
+      throw new Error(`Not enough results. Requested index ${index}, but only ${results.length} results found.`);
+    }
+
+    const selectedImage = results[index];
+
+    // Get the preview or thumbnail URL
+    const imageUrl = selectedImage.image?.source?.url ||
+                     selectedImage.thumbnails?.large?.url ||
+                     selectedImage.url;
+
+    if (!imageUrl) {
+      throw new Error('No valid image URL found in Freepik result');
+    }
+
+    console.log(`📸 Selected image #${index + 1}: ${selectedImage.title || 'Untitled'}`);
+    console.log(`   ID: ${selectedImage.id}`);
+    console.log(`   URL: ${imageUrl}`);
+
+    // Create temp directory if it doesn't exist
+    const tempDir = path.join(__dirname, 'temp');
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir, { recursive: true });
+    }
+
+    // Download image to temp file
+    const tempFile = path.join(tempDir, `freepik-${selectedImage.id}.jpg`);
+    await this.downloadImage(imageUrl, tempFile);
+
+    return tempFile;
   }
 
   /**
@@ -411,6 +532,8 @@ class SVGTextEditor {
    * @param {boolean} options.generatePNG - Whether to generate PNG
    * @param {number} options.pngScale - PNG scale factor
    * @param {string|null} options.backgroundImage - Path to background image
+   * @param {string|null} options.searchCaption - Search caption for Freepik API
+   * @param {number} options.searchIndex - Index of search result to use (default: 0)
    * @param {boolean} options.autoColor - Auto-detect text color from background
    * @param {boolean} options.cropTo5x2 - Crop background image to 5:2 aspect ratio
    * @param {number|null} options.gaussianBlur - Gaussian blur sigma value
@@ -422,24 +545,35 @@ class SVGTextEditor {
       generatePNG = true,
       pngScale = 1,
       backgroundImage = null,
+      searchCaption = null,
+      searchIndex = 0,
       autoColor = true,
       cropTo5x2 = false,
       gaussianBlur = null,
     } = options;
 
     let textColor = null;
+    let finalBackgroundImage = backgroundImage;
 
-    // Replace background image if provided
-    if (backgroundImage) {
+    // Fetch image from Freepik if search caption provided
+    if (searchCaption && !backgroundImage) {
+      console.log(`\n🎨 Fetching background image from Freepik...`);
+      finalBackgroundImage = await this.getFreepikBackgroundImage(searchCaption, searchIndex);
+    } else if (searchCaption && backgroundImage) {
+      console.warn('⚠️  Both --search and --background provided. Using --background.');
+    }
+
+    // Replace background image if provided or fetched
+    if (finalBackgroundImage) {
       // Process image: crop and/or blur for color analysis
-      let imageForColorAnalysis = backgroundImage;
+      let imageForColorAnalysis = finalBackgroundImage;
       let processedBuffer = null;
 
       // Step 1: Crop if needed
       if (cropTo5x2) {
-        processedBuffer = await this.cropImageTo5x2(backgroundImage);
+        processedBuffer = await this.cropImageTo5x2(finalBackgroundImage);
       } else {
-        processedBuffer = fs.readFileSync(backgroundImage);
+        processedBuffer = fs.readFileSync(finalBackgroundImage);
       }
 
       // Step 2: Apply blur if needed
@@ -453,7 +587,7 @@ class SVGTextEditor {
       }
 
       // Replace background (will apply crop and blur)
-      await this.replaceBackgroundImage(backgroundImage, cropTo5x2, gaussianBlur);
+      await this.replaceBackgroundImage(finalBackgroundImage, cropTo5x2, gaussianBlur);
 
       // Auto-detect text color from background if enabled
       if (autoColor) {

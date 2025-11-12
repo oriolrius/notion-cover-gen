@@ -19,6 +19,8 @@ program
   .option('-t, --template <file>', 'Template SVG file', '../notion.svg')
   .option('-s, --size <number>', 'Fixed font size (auto-calculated if not provided)')
   .option('-b, --background <file>', 'Background image (PNG/JPG) to embed in SVG')
+  .option('--search <caption>', 'Search and use image from Freepik based on caption')
+  .option('--search-index <number>', 'Index of Freepik search result to use (0=first, 1=second, etc.)', '0')
   .option('--crop', 'Crop background image to 5:2 aspect ratio')
   .option('--blur <number>', 'Apply Gaussian blur with sigma value (e.g., 5 for light, 15 for heavy)')
   .option('--no-png', 'Skip PNG generation (SVG only)')
@@ -30,6 +32,8 @@ program
       const outputPath = path.resolve(options.output);
       const fontSize = options.size ? parseInt(options.size) : null;
       const backgroundImage = options.background ? path.resolve(options.background) : null;
+      const searchCaption = options.search || null;
+      const searchIndex = parseInt(options.searchIndex);
       const generatePNG = options.png !== false;
       const pngScale = parseFloat(options.pngScale);
       const autoColor = options.autoColor !== false;
@@ -42,6 +46,8 @@ program
       await editor.generate(text, outputPath, {
         fontSize,
         backgroundImage,
+        searchCaption,
+        searchIndex,
         generatePNG,
         pngScale,
         autoColor,
