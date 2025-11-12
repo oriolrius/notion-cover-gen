@@ -7,12 +7,10 @@ Create professional Notion blog covers without design skills. Combines SVG templ
 <div align="center">
 
 [![npm version](https://img.shields.io/npm/v/@oriolrius/notion-cover-gen?style=for-the-badge&logo=npm&color=CB3837)](https://www.npmjs.com/package/@oriolrius/notion-cover-gen)
-[![npm downloads](https://img.shields.io/npm/dw/@oriolrius/notion-cover-gen?style=for-the-badge&logo=npm&color=CB3837)](https://www.npmjs.com/package/@oriolrius/notion-cover-gen)
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/oriolrius/notion-cover-gen/publish.yml?style=for-the-badge&logo=github&label=publish)](https://github.com/oriolrius/notion-cover-gen/actions)
 [![license](https://img.shields.io/npm/l/@oriolrius/notion-cover-gen?style=for-the-badge&color=blue)](https://github.com/oriolrius/notion-cover-gen/blob/main/LICENSE)
 
 [![node version](https://img.shields.io/node/v/@oriolrius/notion-cover-gen?style=for-the-badge&logo=node.js&color=339933)](https://nodejs.org)
-[![package size](https://img.shields.io/bundlephobia/min/@oriolrius/notion-cover-gen?style=for-the-badge&logo=webpack&color=8DD6F9&label=size)](https://bundlephobia.com/package/@oriolrius/notion-cover-gen)
 [![GitHub stars](https://img.shields.io/github/stars/oriolrius/notion-cover-gen?style=for-the-badge&logo=github&color=yellow)](https://github.com/oriolrius/notion-cover-gen/stargazers)
 [![GitHub issues](https://img.shields.io/github/issues/oriolrius/notion-cover-gen?style=for-the-badge&logo=github&color=red)](https://github.com/oriolrius/notion-cover-gen/issues)
 
