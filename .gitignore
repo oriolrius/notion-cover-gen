@@ -13,4 +13,8 @@ sample-*
 dist/
 *.tsbuildinfo
 
+# Docker test data
+n8n-data/
+n8n-outputs/
+
 

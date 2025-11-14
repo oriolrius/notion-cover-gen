@@ -151,7 +151,7 @@ If you want to test Freepik image search:
 
 - **Templates**: `./templates/`
 - **Outputs**: `./n8n-outputs/` (created automatically)
-- **n8n data**: Docker volume `n8n_data`
+- **n8n data**: `./n8n-data/` (created automatically, contains workflows and credentials)
 
 ## 🔧 Troubleshooting
 
@@ -242,10 +242,12 @@ docker ps
 docker stats n8n-notion-cover-gen-test
 ```
 
-### Inspect n8n Data Volume
+### Inspect n8n Data Directory
 ```bash
-docker volume inspect notion-cover-gen_n8n_data
+ls -la n8n-data/
 ```
+
+You can directly browse workflows and credentials in `./n8n-data/` on your host machine.
 
 ## 🧹 Cleanup
 
@@ -262,12 +264,12 @@ docker volume inspect notion-cover-gen_n8n_data
 This will delete:
 - The n8n container
 - The Docker image
-- The n8n data volume (workflows, credentials)
 - Network configuration
+- (Optional) The `n8n-data` and `n8n-outputs` directories on your host
 
 ## 💡 Tips
 
-1. **Persistent Data**: Your workflows and credentials are stored in a Docker volume, so they persist between restarts
+1. **Persistent Data**: Your workflows and credentials are stored in `./n8n-data/` on your host, so they persist between restarts and can be backed up easily
 
 2. **Output Files**: Check `./n8n-outputs/` on your host to see generated files
 

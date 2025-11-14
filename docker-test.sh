@@ -12,8 +12,8 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-# Create outputs directory if it doesn't exist
-mkdir -p n8n-outputs
+# Create directories if they don't exist
+mkdir -p n8n-data n8n-outputs
 
 # Function to display help
 show_help() {
@@ -98,10 +98,20 @@ rebuild() {
 # Function to clean everything
 clean_all() {
     echo -e "${RED}🧹 Cleaning all Docker resources...${NC}"
-    read -p "This will remove all containers, images, and volumes. Continue? (y/N) " -n 1 -r
+    read -p "This will remove all containers, images, and host data directories. Continue? (y/N) " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-        docker-compose down -v --rmi all
+        docker-compose down --rmi all
+
+        # Ask about removing host directories
+        echo ""
+        read -p "Also remove n8n-data and n8n-outputs directories? (y/N) " -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            rm -rf n8n-data n8n-outputs
+            echo -e "${GREEN}✅ Host directories removed${NC}"
+        fi
+
         echo -e "${GREEN}✅ All Docker resources cleaned${NC}"
     else
         echo -e "${YELLOW}Cancelled${NC}"

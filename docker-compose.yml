@@ -20,8 +20,8 @@ services:
       # For Freepik API testing (optional - can be set in n8n UI)
       - FREEPIK_API_KEY=${FREEPIK_API_KEY:-}
     volumes:
-      # Mount n8n data for persistence
-      - n8n_data:/home/node/.n8n
+      # Mount n8n data for persistence (host bind mount)
+      - ./n8n-data:/home/node/.n8n
       # Mount templates directory (read-only)
       - ./templates:/home/node/templates:ro
       # Mount a directory for test outputs
@@ -32,7 +32,3 @@ services:
 networks:
   n8n-network:
     driver: bridge
-
-volumes:
-  n8n_data:
-    driver: local
