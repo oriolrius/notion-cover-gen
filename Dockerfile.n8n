@@ -27,9 +27,10 @@ COPY --chown=node:node templates ./templates
 RUN npm install --include=dev && \
     npm run build
 
-# Install the custom node globally in the n8n environment
-WORKDIR /home/node/.n8n
-RUN npm init -y && \
+# Install the custom node in a separate location (not in .n8n which gets mounted)
+RUN mkdir -p /home/node/n8n-custom-nodes && \
+    cd /home/node/n8n-custom-nodes && \
+    npm init -y --name n8n-custom-nodes && \
     npm install /home/node/custom-node
 
 # Switch back to n8n working directory

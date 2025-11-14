@@ -17,6 +17,8 @@ services:
       - WEBHOOK_URL=http://localhost:5678/
       - GENERIC_TIMEZONE=Europe/Madrid
       - TZ=Europe/Madrid
+      # Custom nodes location
+      - N8N_CUSTOM_EXTENSIONS=/home/node/n8n-custom-nodes
       # For Freepik API testing (optional - can be set in n8n UI)
       - FREEPIK_API_KEY=${FREEPIK_API_KEY:-}
     volumes:
