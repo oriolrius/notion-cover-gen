@@ -2,6 +2,18 @@
 
 This package includes an n8n community node that brings all the CLI functionality into your n8n workflows.
 
+## 🧪 Test Locally with Docker
+
+Want to test the node before installing? Use our Docker setup:
+
+```bash
+./docker-test.sh start
+```
+
+Access n8n at http://localhost:5678 (admin/admin) with the node pre-installed.
+
+**[📖 Full Docker Testing Guide →](./DOCKER_TESTING.md)**
+
 ## Installation
 
 ### In n8n Cloud or Self-hosted

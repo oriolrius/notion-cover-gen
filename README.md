@@ -344,6 +344,8 @@ notion-cover-gen/
 
 ## 🛠️ Development
 
+### CLI Development
+
 ```bash
 # Clone repository
 git clone https://github.com/oriolrius/notion-cover-gen.git
@@ -358,6 +360,29 @@ npm link
 # Test command
 notion-cover-gen "Test Cover" --search "test"
 ```
+
+### n8n Node Development & Testing
+
+Test the n8n node locally using Docker:
+
+```bash
+# Start n8n with the custom node
+./docker-test.sh start
+
+# Access n8n at http://localhost:5678
+# Username: admin / Password: admin
+```
+
+The node will be available in the **Transform** category as "Notion Cover Gen".
+
+**[📖 Full Docker Testing Guide →](./DOCKER_TESTING.md)**
+
+Available commands:
+- `./docker-test.sh start` - Start n8n with custom node
+- `./docker-test.sh logs` - View n8n logs
+- `./docker-test.sh rebuild` - Rebuild after code changes
+- `./docker-test.sh stop` - Stop n8n
+- `./docker-test.sh clean` - Remove all Docker resources
 
 ## 🤝 Contributing
 

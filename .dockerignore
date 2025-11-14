@@ -1,0 +1,56 @@
+# Git
+.git
+.gitignore
+
+# Node modules (will be installed in container)
+node_modules/
+
+# Build artifacts
+dist/
+*.tsbuildinfo
+
+# Development files
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Output and temp files
+output.svg
+output.png
+sample-*
+temp/
+n8n-outputs/
+
+# Documentation (not needed in container)
+*.md
+!README.md
+
+# Docker files (not needed in container)
+docker-compose.yml
+Dockerfile.n8n
+docker-test.sh
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Test files
+test/
+tests/
+*.test.js
+*.test.ts
+*.spec.js
+*.spec.ts

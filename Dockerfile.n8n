@@ -1,0 +1,42 @@
+FROM n8nio/n8n:latest
+
+USER root
+
+# Install additional system dependencies if needed
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++
+
+USER node
+
+# Set working directory
+WORKDIR /home/node/custom-node
+
+# Copy package files first for better caching
+COPY --chown=node:node package*.json ./
+COPY --chown=node:node tsconfig.json ./
+
+# Copy source code
+COPY --chown=node:node nodes ./nodes
+COPY --chown=node:node svg-editor.js ./
+COPY --chown=node:node cli.js ./
+COPY --chown=node:node templates ./templates
+
+# Install dependencies and build
+RUN npm install && \
+    npm run build
+
+# Install the custom node globally in the n8n environment
+WORKDIR /home/node/.n8n
+RUN npm init -y && \
+    npm install /home/node/custom-node
+
+# Switch back to n8n working directory
+WORKDIR /home/node
+
+# Expose n8n port
+EXPOSE 5678
+
+# Use the default n8n entrypoint
+CMD ["n8n"]

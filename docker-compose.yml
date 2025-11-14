@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  n8n:
+    build:
+      context: .
+      dockerfile: Dockerfile.n8n
+    container_name: n8n-notion-cover-gen-test
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=admin
+      - NODE_ENV=production
+      - WEBHOOK_URL=http://localhost:5678/
+      - GENERIC_TIMEZONE=Europe/Madrid
+      - TZ=Europe/Madrid
+      # For Freepik API testing (optional - can be set in n8n UI)
+      - FREEPIK_API_KEY=${FREEPIK_API_KEY:-}
+    volumes:
+      # Mount n8n data for persistence
+      - n8n_data:/home/node/.n8n
+      # Mount templates directory (read-only)
+      - ./templates:/home/node/templates:ro
+      # Mount a directory for test outputs
+      - ./n8n-outputs:/home/node/outputs
+    networks:
+      - n8n-network
+
+networks:
+  n8n-network:
+    driver: bridge
+
+volumes:
+  n8n_data:
+    driver: local
