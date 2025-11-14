@@ -12,6 +12,17 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
+# Detect docker compose command (modern: docker compose, legacy: docker-compose)
+if docker compose version &> /dev/null; then
+    DOCKER_COMPOSE="docker compose"
+elif command -v docker-compose &> /dev/null; then
+    DOCKER_COMPOSE="docker-compose"
+else
+    echo -e "${RED}❌ Error: Neither 'docker compose' nor 'docker-compose' found${NC}"
+    echo -e "${YELLOW}Please install Docker and Docker Compose${NC}"
+    exit 1
+fi
+
 # Create directories if they don't exist
 mkdir -p n8n-data n8n-outputs
 
@@ -49,7 +60,7 @@ start_n8n() {
     fi
 
     # Build and start
-    docker-compose up -d --build
+    $DOCKER_COMPOSE up -d --build
 
     echo ""
     echo -e "${GREEN}✅ n8n is starting up!${NC}"
@@ -68,14 +79,14 @@ start_n8n() {
 # Function to stop n8n
 stop_n8n() {
     echo -e "${BLUE}🛑 Stopping n8n...${NC}"
-    docker-compose down
+    $DOCKER_COMPOSE down
     echo -e "${GREEN}✅ n8n stopped${NC}"
 }
 
 # Function to restart n8n
 restart_n8n() {
     echo -e "${BLUE}🔄 Restarting n8n...${NC}"
-    docker-compose restart
+    $DOCKER_COMPOSE restart
     echo -e "${GREEN}✅ n8n restarted${NC}"
 }
 
@@ -83,15 +94,15 @@ restart_n8n() {
 show_logs() {
     echo -e "${BLUE}📋 Showing n8n logs (Ctrl+C to exit)...${NC}"
     echo ""
-    docker-compose logs -f n8n
+    $DOCKER_COMPOSE logs -f n8n
 }
 
 # Function to rebuild
 rebuild() {
     echo -e "${BLUE}🔨 Rebuilding Docker image from scratch...${NC}"
-    docker-compose down
-    docker-compose build --no-cache
-    docker-compose up -d
+    $DOCKER_COMPOSE down
+    $DOCKER_COMPOSE build --no-cache
+    $DOCKER_COMPOSE up -d
     echo -e "${GREEN}✅ Rebuild complete!${NC}"
 }
 
@@ -101,7 +112,7 @@ clean_all() {
     read -p "This will remove all containers, images, and host data directories. Continue? (y/N) " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-        docker-compose down --rmi all
+        $DOCKER_COMPOSE down --rmi all
 
         # Ask about removing host directories
         echo ""
@@ -122,7 +133,7 @@ clean_all() {
 show_status() {
     echo -e "${BLUE}📊 Container Status:${NC}"
     echo ""
-    docker-compose ps
+    $DOCKER_COMPOSE ps
 }
 
 # Main script logic
