@@ -9,4 +9,8 @@ output.svg
 output.png
 sample-*
 
+# TypeScript build artifacts
+dist/
+*.tsbuildinfo
+
 

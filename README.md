@@ -1,8 +1,8 @@
 # Notion Cover Gen 🎨
 
-> AI-powered CLI for generating beautiful Notion blog post covers in seconds
+> AI-powered CLI & n8n node for generating beautiful Notion blog post covers in seconds
 
-Create professional Notion blog covers without design skills. Combines SVG templates, Freepik stock images, smart text sizing, and automatic color contrast detection. Perfect for content creators who want beautiful headers fast.
+Create professional Notion blog covers without design skills. Combines SVG templates, Freepik stock images, smart text sizing, and automatic color contrast detection. Use as CLI or integrate into n8n workflows. Perfect for content creators who want beautiful headers fast.
 
 <div align="center">
 
@@ -48,6 +48,30 @@ notion-cover-gen "My Blog Post Title" --search "technology abstract" --crop --bl
 - ✅ Text sized to fit perfectly
 - ✅ Professional blur effect for readability
 - ✅ Both SVG and PNG formats
+
+## 🔌 n8n Integration
+
+**NEW:** Use Notion Cover Gen directly in your n8n workflows! Automate cover generation for blog posts, social media, or any content pipeline.
+
+### Quick Setup
+
+1. Install in n8n: **Settings** > **Community Nodes** > `@oriolrius/notion-cover-gen`
+2. Add your Freepik API credentials (optional, for image search)
+3. Use in workflows with 3 operations: **Generate**, **Convert**, **Replace Background**
+
+### Example Workflow
+
+```
+Webhook → Notion Cover Gen → Move Binary → Upload to S3
+```
+
+Generate covers automatically when:
+- New blog post created in CMS
+- Notion database entry added
+- Scheduled content published
+- Social media post scheduled
+
+**[📖 Full n8n Documentation →](./N8N_NODE.md)**
 
 ## 🎯 Features
 
@@ -353,6 +377,7 @@ Built with:
 - [@resvg/resvg-js](https://github.com/yisibl/resvg-js) - High-quality SVG rendering
 - [sharp](https://github.com/lovell/sharp) - Fast image processing
 - [commander](https://github.com/tj/commander.js) - CLI framework
+- [n8n](https://n8n.io/) - Workflow automation integration
 - [Freepik API](https://www.freepik.com/api/) - Stock image search
 
 ## 💬 Support
