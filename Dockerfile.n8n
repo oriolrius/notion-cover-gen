@@ -23,8 +23,8 @@ COPY --chown=node:node svg-editor.js ./
 COPY --chown=node:node cli.js ./
 COPY --chown=node:node templates ./templates
 
-# Install dependencies and build
-RUN npm install && \
+# Install dependencies (including devDependencies for build) and build
+RUN npm install --include=dev && \
     npm run build
 
 # Install the custom node globally in the n8n environment
